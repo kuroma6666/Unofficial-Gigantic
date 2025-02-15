@@ -202,7 +202,7 @@ object RankingButtons {
                 sublime()
             }
         }
-s
+
         override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
             // player.offer(Keys.MENU_RANKING_SCORE, score)
             // RankingMenu.open(player)

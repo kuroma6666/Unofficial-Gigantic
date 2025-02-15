@@ -20,9 +20,9 @@ object RankingSelectMenu : Menu() {
     }
 
     init {
-        registerButton(1, RankingButtons.TOTAL_SCORE_RANKING_SELECT)
-        registerButton(2, RankingButtons.DAILY_SCORE_RANKING_SELECT)
-        registerButton(3, RankingButtons.MONTHLY_SCORE_RANKING_SELECT)
+        registerButton(2, RankingButtons.TOTAL_SCORE_RANKING_SELECT)
+        registerButton(4, RankingButtons.DAILY_SCORE_RANKING_SELECT)
+        registerButton(6, RankingButtons.MONTHLY_SCORE_RANKING_SELECT)
         
         registerButton(18, RankingButtons.DIAMOND)
         registerButton(27, RankingButtons.GOLD)
