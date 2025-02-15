@@ -162,4 +162,53 @@ object RankingButtons {
         }
     }
 
+    val TOTAL_SCORE_RANKING_SELECT =
+        object : Button {
+            override fun toShownItemStack(player: Player): ItemStack? {
+                return itemStackOf(Material.DIAMOND_ORE) {
+                    setDisplayName(player, RankingMessages.TOTAL_SCORE_RANKING_SELECT)
+                    sublime()
+                }
+            }
+
+            override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
+                // player.offer(Keys.MENU_RANKING_SCORE, score)
+                // RankingMenu.open(player)
+                //★クリック時のアクション実装
+                return true
+            }
+        }
+    val DAILY_SCORE_RANKING_SELECT =
+    object : Button {
+        override fun toShownItemStack(player: Player): ItemStack? {
+            return itemStackOf(Material.IRON_ORE) {
+                setDisplayName(player, RankingMessages.DAILY_SCORE_RANKING_SELECT)
+                sublime()
+            }
+        }
+
+        override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
+            // player.offer(Keys.MENU_RANKING_SCORE, score)
+            // RankingMenu.open(player)
+            //★クリック時のアクション実装
+            return true
+        }
+    }
+    val MONTHLY_SCORE_RANKING_SELECT =
+    object : Button {
+        override fun toShownItemStack(player: Player): ItemStack? {
+            return itemStackOf(Material.GOLD_ORE) {
+                setDisplayName(player, RankingMessages.MONTHLY_SCORE_RANKING_SELECT)
+                sublime()
+            }
+        }
+s
+        override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
+            // player.offer(Keys.MENU_RANKING_SCORE, score)
+            // RankingMenu.open(player)
+            //★クリック時のアクション実装
+            return true
+        }
+    }
+
 }

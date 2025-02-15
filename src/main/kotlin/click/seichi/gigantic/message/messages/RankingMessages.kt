@@ -113,4 +113,17 @@ object RankingMessages {
             Locale.JAPANESE to "${ChatColor.YELLOW}[お知らせ] ${ChatColor.GREEN}ランキングが更新されました。"
     )
 
+    val TOTAL_SCORE_RANKING_SELECT = LocalizedText(
+            Locale.JAPANESE to "${ChatColor.AQUA}${ChatColor.BOLD}" +
+                    "総合ランキング"
+    )
+    val DAILY_SCORE_RANKING_SELECT = LocalizedText(
+            Locale.JAPANESE to "${ChatColor.AQUA}${ChatColor.BOLD}" +
+                    "日間ランキング"
+    )
+    val MONTHLY_SCORE_RANKING_SELECT = LocalizedText(
+            Locale.JAPANESE to "${ChatColor.AQUA}${ChatColor.BOLD}" +
+                    "月間ランキング"
+    )
+
 }
