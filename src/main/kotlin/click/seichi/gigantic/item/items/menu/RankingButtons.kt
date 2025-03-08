@@ -6,10 +6,14 @@ import click.seichi.gigantic.cache.key.Keys
 import click.seichi.gigantic.extension.*
 import click.seichi.gigantic.head.Head
 import click.seichi.gigantic.item.Button
+import click.seichi.gigantic.menu.RankingCategory
 import click.seichi.gigantic.menu.menus.RankingMenu
+import click.seichi.gigantic.menu.menus.RankingSelectMenu
+import click.seichi.gigantic.menu.menus.rankings.*
 import click.seichi.gigantic.message.messages.RankingMessages
 import click.seichi.gigantic.ranking.RankingPlayer
 import click.seichi.gigantic.ranking.Score
+import click.seichi.gigantic.ranking.DailyScore
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -73,6 +77,26 @@ object RankingButtons {
         }
     }
 
+    val DAILY_RANKED_PLAYER: (DailyScore, Int) -> Button = { score: DailyScore, rank: Int ->
+        object : Button {
+            override fun toShownItemStack(player: Player): ItemStack? {
+                val ranking = Gigantic.DAILY_RANKING_MAP[score] ?: return null
+                val uniqueId = ranking.findUUID(rank) ?: return null
+                val rankingPlayer = RankingPlayer(
+                        uniqueId, rank, RankingPlayerCacheMemory.find(uniqueId) ?: return null
+                )
+                val value = ranking.findValue(uniqueId) ?: return null
+                return Head.getOfflinePlayerHead(uniqueId).apply {
+                    setDisplayName(player, RankingMessages.RANKED_PLAYER(rank, rankingPlayer.name, rankingPlayer.level))
+                    setLore(RankingMessages.RANKED_PLAYER_LORE(
+                            value,
+                            score.getUnit(player.wrappedLocale)
+                    ).asSafety(player.wrappedLocale))
+                }
+            }
+        }
+    }
+
     val SCORE: (Score) -> Button = { score: Score ->
         object : Button {
             override fun toShownItemStack(player: Player): ItemStack? {
@@ -117,7 +141,57 @@ object RankingButtons {
         }
     }
 
+    val DAILY_SCORE: (DailyScore) -> Button = { score: DailyScore ->
+        object : Button {
+            override fun toShownItemStack(player: Player): ItemStack? {
+                val ranking = Gigantic.DAILY_RANKING_MAP[score]
+                val rank = ranking?.findRank(player.uniqueId)
+                val value = ranking?.findValue(player.uniqueId)
+                return score.getIcon().apply {
+                    setDisplayName(player, RankingMessages.DAILY_SCORE(score))
+                    sublime()
+                    setEnchanted(true)
+                    if (rank != null && value != null) {
+                        setLore(*RankingMessages.SCORE_LORE(rank, value)
+                                .map {
+                                    it.asSafety(player.wrappedLocale)
+                                }
+                                .toTypedArray())
+                    } else {
+                        setLore(*RankingMessages.NO_DATA
+                                .map {
+                                    it.asSafety(player.wrappedLocale)
+                                }.toTypedArray()
+                        )
+                    }
+                    addLore(RankingMessages.CLICK_TO_RANKING.asSafety(player.wrappedLocale))
+                }
+            }
+
+            override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
+                player.offer(Keys.MENU_DAILY_RANKING_SCORE, score)
+                DailyRankingMenu.open(player)
+                return true
+            }
+        }
+    }
+
     val RANKING_PLAYER: (RankingPlayer, Score) -> Button = { rankingPlayer, score ->
+        object : Button {
+            override fun toShownItemStack(player: Player): ItemStack? {
+                return Head.getOfflinePlayerHead(rankingPlayer.uniqueId).apply {
+                    setDisplayName(player, RankingMessages.RANKED_PLAYER(rankingPlayer.rank, rankingPlayer.name, rankingPlayer.level))
+                    setLore(RankingMessages.RANKED_PLAYER_LORE(
+                            score.getValue(rankingPlayer),
+                            score.getUnit(player.wrappedLocale)
+                    ).asSafety(player.wrappedLocale))
+                    sublime()
+                }
+            }
+        }
+    }
+
+    val DAILY_RANKING_PLAYER: (RankingPlayer, DailyScore) -> Button = { rankingPlayer, score ->
         object : Button {
             override fun toShownItemStack(player: Player): ItemStack? {
                 return Head.getOfflinePlayerHead(rankingPlayer.uniqueId).apply {
@@ -164,38 +238,63 @@ object RankingButtons {
 
     val TOTAL_SCORE_RANKING_SELECT =
         object : Button {
+            val category = RankingCategory.TOTAL
             override fun toShownItemStack(player: Player): ItemStack? {
                 return itemStackOf(Material.DIAMOND_ORE) {
                     setDisplayName(player, RankingMessages.TOTAL_SCORE_RANKING_SELECT)
                     sublime()
+                    if(player.getOrPut(Keys.MENU_RANKING_CATEGORY) == category)
+                    {
+                        setEnchanted(true)
+                    }
                 }
             }
 
             override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
-                // player.offer(Keys.MENU_RANKING_SCORE, score)
-                // RankingMenu.open(player)
-                //★クリック時のアクション実装
+                val score = player.getOrPut(Keys.MENU_RANKING_SCORE)
+                // val ranking = Gigantic.RANKING_MAP.getValue(score)
+                // val playerRank = ranking.findRank(player.uniqueId) ?: return false
+                // val playerPage = playerRank.minus(1).div(numOfContentsPerPage).plus(1).coerceAtLeast(1)
+                player.offer(Keys.MENU_RANKING_SCORE, score)
+                player.offer(Keys.MENU_RANKING_CATEGORY, RankingCategory.TOTAL)
+                RankingSelectMenu.open(player)
                 return true
             }
         }
+
     val DAILY_SCORE_RANKING_SELECT =
     object : Button {
+        val scoreType = DailyScore.DAILY_EXP
+        val category = RankingCategory.DAILY
+
         override fun toShownItemStack(player: Player): ItemStack? {
             return itemStackOf(Material.IRON_ORE) {
                 setDisplayName(player, RankingMessages.DAILY_SCORE_RANKING_SELECT)
                 sublime()
+                if(player.getOrPut(Keys.MENU_RANKING_CATEGORY) == category)
+                {
+                    setEnchanted(true)
+                }
+
             }
         }
 
         override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
-            // player.offer(Keys.MENU_RANKING_SCORE, score)
-            // RankingMenu.open(player)
-            //★クリック時のアクション実装
+            val score = player.getOrPut(Keys.MENU_DAILY_RANKING_SCORE)
+            
+            // val ranking = Gigantic.DAILY_RANKING_MAP.getValue(score)
+            // val playerRank = ranking.findRank(player.uniqueId) ?: return false
+            // val playerPage = playerRank.minus(1).div(numOfContentsPerPage).plus(1).coerceAtLeast(1)
+            player.offer(Keys.MENU_DAILY_RANKING_SCORE, score)
+            player.offer(Keys.MENU_RANKING_CATEGORY, RankingCategory.DAILY)
+            DailyRankingSelectMenu.open(player)
             return true
         }
     }
+
     val MONTHLY_SCORE_RANKING_SELECT =
     object : Button {
+
         override fun toShownItemStack(player: Player): ItemStack? {
             return itemStackOf(Material.GOLD_ORE) {
                 setDisplayName(player, RankingMessages.MONTHLY_SCORE_RANKING_SELECT)
@@ -204,7 +303,7 @@ object RankingButtons {
         }
 
         override fun tryClick(player: Player, event: InventoryClickEvent): Boolean {
-            // player.offer(Keys.MENU_RANKING_SCORE, score)
+            // player.offer(Keys.MENU_DAILY_RANKING_SCORE, score)
             // RankingMenu.open(player)
             //★クリック時のアクション実装
             return true

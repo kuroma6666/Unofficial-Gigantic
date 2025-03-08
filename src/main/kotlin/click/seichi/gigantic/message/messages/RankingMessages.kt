@@ -2,6 +2,7 @@ package click.seichi.gigantic.message.messages
 
 import click.seichi.gigantic.message.LocalizedText
 import click.seichi.gigantic.ranking.Score
+import click.seichi.gigantic.ranking.DailyScore
 import org.bukkit.ChatColor
 import org.joda.time.DateTime
 import java.util.*
@@ -11,9 +12,9 @@ import java.util.*
  */
 object RankingMessages {
 
-    val TITLE = { dateTime: DateTime ->
+    val TITLE = { dateTime: DateTime, duration: LocalizedText->
         LocalizedText(
-                Locale.JAPANESE to "ランキング ${dateTime.toString("yyyy/MM/dd kk:mm:ss")}"
+                Locale.JAPANESE to "ランキング(${duration.toString()}) ${dateTime.toString("yyyy/MM/dd kk:mm:ss")}"
         )
     }
 
@@ -58,6 +59,16 @@ object RankingMessages {
     }
 
     val SCORE = { score: Score ->
+
+        LocalizedText(
+                Locale.JAPANESE.let {
+                    it to "${ChatColor.YELLOW}${ChatColor.BOLD}" +
+                            score.getName(it)
+                }
+        )
+    }
+
+    val DAILY_SCORE = { score: DailyScore ->
 
         LocalizedText(
                 Locale.JAPANESE.let {
