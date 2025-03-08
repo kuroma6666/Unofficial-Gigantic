@@ -190,7 +190,7 @@ enum class Score(
             SortOrder.DESC,
             potionOf(Color.BLACK),
             LocalizedText(
-                    Locale.JAPANESE to "露天掘り面積ランキング"
+                    Locale.JAPANESE to "累計露天掘り面積ランキング"
             ),
             LocalizedText(
                     Locale.JAPANESE to "chunk"
