@@ -24,6 +24,7 @@ import click.seichi.gigantic.database.table.user.UserMuteTable
 import click.seichi.gigantic.effect.GiganticEffect
 import click.seichi.gigantic.menu.MissionCategory
 import click.seichi.gigantic.menu.RelicCategory
+import click.seichi.gigantic.menu.RankingCategory
 import click.seichi.gigantic.mission.Mission
 import click.seichi.gigantic.mission.MissionClient
 import click.seichi.gigantic.monster.SoulMonster
@@ -32,6 +33,7 @@ import click.seichi.gigantic.quest.Quest
 import click.seichi.gigantic.quest.QuestClient
 import click.seichi.gigantic.ranking.RankingPlayer
 import click.seichi.gigantic.ranking.Score
+import click.seichi.gigantic.ranking.DailyScore
 import click.seichi.gigantic.relic.Relic
 import click.seichi.gigantic.sidebar.Log
 import click.seichi.gigantic.sidebar.SideBar
@@ -1378,12 +1380,41 @@ object Keys {
 
     }
 
+    val MENU_RANKING_CATEGORY = object : Key<PlayerCache, RankingCategory> {
+        override val default: RankingCategory
+            get() = RankingCategory.TOTAL
+
+        override fun satisfyWith(value: RankingCategory): Boolean {
+            return true
+        }
+    }
+
     val RANK_EXP = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
         override val default: Long
             get() = 0L
 
         override fun read(entity: RankingEntity): Long {
             val rankingScore = entity.score
+            return rankingScore.exp
+        }
+
+        override fun store(entity: RankingEntity, value: Long) {
+            // do nothing
+        }
+
+        override fun satisfyWith(value: Long): Boolean {
+            // 強制的に書き換えを拒否
+            Gigantic.PLUGIN.logger.warning("書き換えは禁止されています")
+            return false
+        }
+    }
+
+    val DAILY_RANK_EXP = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
+        override val default: Long
+            get() = 0L
+
+        override fun read(entity: RankingEntity): Long {
+            val rankingScore = entity.dailyScore
             return rankingScore.exp
         }
 
@@ -1418,6 +1449,26 @@ object Keys {
         }
     }
 
+    val DAILY_RANK_BREAK_BLOCK = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
+        override val default: Long
+            get() = 0L
+
+        override fun read(entity: RankingEntity): Long {
+            val rankingScore = entity.dailyScore
+            return rankingScore.breakBlock
+        }
+
+        override fun store(entity: RankingEntity, value: Long) {
+            // do nothing
+        }
+
+        override fun satisfyWith(value: Long): Boolean {
+            // 強制的に書き換えを拒否
+            Gigantic.PLUGIN.logger.warning("書き換えは禁止されています")
+            return false
+        }
+    }
+
     val RANK_MULTI_BREAK_BLOCK = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
         override val default: Long
             get() = 0L
@@ -1438,12 +1489,52 @@ object Keys {
         }
     }
 
+    val DAILY_RANK_MULTI_BREAK_BLOCK = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
+        override val default: Long
+            get() = 0L
+
+        override fun read(entity: RankingEntity): Long {
+            val rankingScore = entity.dailyScore
+            return rankingScore.multiBreakBlock
+        }
+
+        override fun store(entity: RankingEntity, value: Long) {
+            // do nothing
+        }
+
+        override fun satisfyWith(value: Long): Boolean {
+            // 強制的に書き換えを拒否
+            Gigantic.PLUGIN.logger.warning("書き換えは禁止されています")
+            return false
+        }
+    }
+
     val RANK_RELIC_BONUS = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
         override val default: Long
             get() = 0L
 
         override fun read(entity: RankingEntity): Long {
             val rankingScore = entity.score
+            return rankingScore.relicBonus
+        }
+
+        override fun store(entity: RankingEntity, value: Long) {
+            // do nothing
+        }
+
+        override fun satisfyWith(value: Long): Boolean {
+            // 強制的に書き換えを拒否
+            Gigantic.PLUGIN.logger.warning("書き換えは禁止されています")
+            return false
+        }
+    }
+
+    val DAILY_RANK_RELIC_BONUS = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
+        override val default: Long
+            get() = 0L
+
+        override fun read(entity: RankingEntity): Long {
+            val rankingScore = entity.dailyScore
             return rankingScore.relicBonus
         }
 
@@ -1479,6 +1570,26 @@ object Keys {
         }
     }
 
+    val DAILY_RANK_MAX_COMBO = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
+        override val default: Long
+            get() = 0L
+
+        override fun read(entity: RankingEntity): Long {
+            val rankingScore = entity.dailyScore
+            return rankingScore.maxCombo
+        }
+
+        override fun store(entity: RankingEntity, value: Long) {
+            // do nothing
+        }
+
+        override fun satisfyWith(value: Long): Boolean {
+            // 強制的に書き換えを拒否
+            Gigantic.PLUGIN.logger.warning("書き換えは禁止されています")
+            return false
+        }
+    }
+
 
     val RANK_RELIC = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
         override val default: Long
@@ -1486,6 +1597,26 @@ object Keys {
 
         override fun read(entity: RankingEntity): Long {
             val rankingScore = entity.score
+            return rankingScore.relic
+        }
+
+        override fun store(entity: RankingEntity, value: Long) {
+            // do nothing
+        }
+
+        override fun satisfyWith(value: Long): Boolean {
+            // 強制的に書き換えを拒否
+            Gigantic.PLUGIN.logger.warning("書き換えは禁止されています")
+            return false
+        }
+    }
+
+    val DAILY_RANK_RELIC = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
+        override val default: Long
+            get() = 0L
+
+        override fun read(entity: RankingEntity): Long {
+            val rankingScore = entity.dailyScore
             return rankingScore.relic
         }
 
@@ -1558,6 +1689,26 @@ object Keys {
         }
     }
 
+    val DAILY_RANK_STRIP_MINE = object : DatabaseKey<RankingPlayerCache, Long, RankingEntity> {
+        override val default: Long
+            get() = 0L
+
+        override fun read(entity: RankingEntity): Long {
+            val rankingScore = entity.dailyScore
+            return rankingScore.stripMine
+        }
+
+        override fun store(entity: RankingEntity, value: Long) {
+            // do nothing
+        }
+
+        override fun satisfyWith(value: Long): Boolean {
+            // 強制的に書き換えを拒否
+            Gigantic.PLUGIN.logger.warning("書き換えは禁止されています")
+            return false
+        }
+    }
+
     val MENU_RANKING_PLAYER_LIST = object : Key<PlayerCache, List<RankingPlayer>> {
         override val default: List<RankingPlayer>
             get() = listOf()
@@ -1572,6 +1723,15 @@ object Keys {
             get() = Score.EXP
 
         override fun satisfyWith(value: Score): Boolean {
+            return true
+        }
+    }
+
+    val MENU_DAILY_RANKING_SCORE = object : Key<PlayerCache, DailyScore> {
+        override val default: DailyScore
+            get() = DailyScore.DAILY_EXP
+
+        override fun satisfyWith(value: DailyScore): Boolean {
             return true
         }
     }

@@ -3,6 +3,7 @@ package click.seichi.gigantic.cache.cache
 import click.seichi.gigantic.cache.key.Keys
 import click.seichi.gigantic.database.RankingEntity
 import click.seichi.gigantic.ranking.Score
+import click.seichi.gigantic.ranking.DailyScore
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
@@ -22,6 +23,9 @@ class RankingPlayerCache(private val uniqueId: UUID) : Cache<RankingPlayerCache>
             }
 
             Score.values().forEach {
+                it.read(rankingEntity, this@RankingPlayerCache)
+            }
+            DailyScore.values().forEach {
                 it.read(rankingEntity, this@RankingPlayerCache)
             }
         }

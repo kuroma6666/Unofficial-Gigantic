@@ -5,6 +5,7 @@ import click.seichi.gigantic.cache.key.Keys
 import click.seichi.gigantic.database.RankingEntity
 import click.seichi.gigantic.database.UserEntity
 import click.seichi.gigantic.ranking.Score
+import click.seichi.gigantic.ranking.DailyScore
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import java.util.*
@@ -306,6 +307,7 @@ class PlayerCache(private val uniqueId: UUID, private val playerName: String) : 
             }
 
             Score.values().forEach { it.write(rankingEntity, this@PlayerCache) }
+            DailyScore.values().forEach { it.write(rankingEntity, this@PlayerCache) }
         }
     }
 
