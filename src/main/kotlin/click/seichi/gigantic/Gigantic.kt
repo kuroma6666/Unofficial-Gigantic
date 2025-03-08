@@ -10,6 +10,7 @@ import click.seichi.gigantic.database.table.DonateHistoryTable
 import click.seichi.gigantic.database.table.PurchaseHistoryTable
 import click.seichi.gigantic.database.table.ranking.RankingScoreTable
 import click.seichi.gigantic.database.table.ranking.RankingUserTable
+import click.seichi.gigantic.database.table.ranking.DailyRankingScoreTable
 import click.seichi.gigantic.database.table.user.*
 import click.seichi.gigantic.effect.GiganticEffect
 import click.seichi.gigantic.event.events.TickEvent
@@ -28,7 +29,9 @@ import click.seichi.gigantic.product.Product
 import click.seichi.gigantic.quest.Quest
 import click.seichi.gigantic.ranking.Combo30minRanking
 import click.seichi.gigantic.ranking.Ranking
+import click.seichi.gigantic.ranking.DailyRanking
 import click.seichi.gigantic.ranking.Score
+import click.seichi.gigantic.ranking.DailyScore
 import click.seichi.gigantic.relic.Relic
 import click.seichi.gigantic.spirit.SpiritManager
 import click.seichi.gigantic.tool.Tool
@@ -84,6 +87,8 @@ class Gigantic : JavaPlugin() {
         val USE_BLOCK_SET = mutableSetOf<Block>()
 
         val RANKING_MAP = mutableMapOf<Score, Ranking>()
+
+        val DAILY_RANKING_MAP = mutableMapOf<DailyScore, DailyRanking>()
 
         lateinit var RANKING_UPDATE_TIME: DateTime
     }
@@ -194,6 +199,7 @@ class Gigantic : JavaPlugin() {
                     PurchaseHistoryTable,
                     //ranking
                     RankingScoreTable,
+                    DailyRankingScoreTable,
                     RankingUserTable
             )
         }.onFailure { exception ->
@@ -205,6 +211,7 @@ class Gigantic : JavaPlugin() {
 
         // ランキングデータ生成
         updateRanking()
+        updateDailyRanking()
 
         // 30分間隔のコンボランキングタイマー開始
         Combo30minRanking()
@@ -297,6 +304,27 @@ class Gigantic : JavaPlugin() {
                     Ranking(score)
                 }.update()
                 uniqueIdSet.addAll(RANKING_MAP.getValue(score).rankMap.values)
+            }
+            RankingPlayerCacheMemory.clearAll()
+            RankingPlayerCacheMemory.addAll(*uniqueIdSet.toTypedArray())
+        }
+        Bukkit.getServer().onlinePlayers
+            .filterNotNull()
+            .filter { it.isValid && ToggleSetting.UPDATE_RANKING.getToggle(it) }
+            .forEach { player ->
+                player.sendMessage(RankingMessages.UPDATE_RANKING.asSafety(player.wrappedLocale))
+            }
+    }
+
+    fun updateDailyRanking() {
+        RANKING_UPDATE_TIME = DateTime.now()
+        transaction {
+            val uniqueIdSet = mutableSetOf<UUID>()
+            DailyScore.values().forEach { score ->
+                DAILY_RANKING_MAP.getOrPut(score) {
+                    DailyRanking(score)
+                }.update()
+                uniqueIdSet.addAll(DAILY_RANKING_MAP.getValue(score).rankMap.values)
             }
             RankingPlayerCacheMemory.clearAll()
             RankingPlayerCacheMemory.addAll(*uniqueIdSet.toTypedArray())

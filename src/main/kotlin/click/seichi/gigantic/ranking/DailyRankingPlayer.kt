@@ -5,7 +5,7 @@ import click.seichi.gigantic.cache.key.Keys
 import java.util.*
 
 /**
- * @author tar0ss
+ * @author kuroma6666
  */
 class DailyRankingPlayer(
         val uniqueId: UUID,

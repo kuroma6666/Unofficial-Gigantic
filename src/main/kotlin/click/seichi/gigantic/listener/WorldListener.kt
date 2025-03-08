@@ -60,6 +60,7 @@ class WorldListener : Listener {
             // ランキングデータの更新
             runTaskLaterAsync(Defaults.RANK_DATA_SAVE_DELAY) {
             Gigantic.PLUGIN.updateRanking()
+            Gigantic.PLUGIN.updateDailyRanking()
             }
         }
     }
